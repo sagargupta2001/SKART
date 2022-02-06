@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -20,17 +23,16 @@ namespace API.Controllers
 
         // GET: api/<ProductsController>
         [HttpGet]
-        public ActionResult<Product> GetProducts()
+        public async Task<ActionResult<List<Product>>> GetProducts()
         {
-            var products = _storeContext.Products;
-            return Ok(products);
+            return await _storeContext.Products.ToListAsync();
         }
 
         // GET api/<ProductsController>/5
         [HttpGet("{id}")]
-        public ActionResult<Product> GetProduct(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            return _storeContext.Products.Find(id);
+            return await _storeContext.Products.FindAsync(id);
         }
 
         
