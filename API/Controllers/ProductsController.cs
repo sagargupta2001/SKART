@@ -6,6 +6,7 @@ using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,7 +23,7 @@ namespace API.Controllers
 
         // GET: api/<ProductsController>
         [HttpGet]
-        public async Task<ActionResult<PagedList<Product>>> GetProducts(ProductParams productParams)
+        public async Task<ActionResult<PagedList<Product>>> GetProducts([FromQuery]ProductParams productParams)
         {
             var query = _storeContext.Products
                 .Sort(productParams.OrderBy)
@@ -33,11 +34,11 @@ namespace API.Controllers
             var products = await PagedList<Product>.ToPagedList(query,
                 productParams.PageNumber,
                 productParams.PageSize);
-
-            Response.Headers.Add("Pagination", JsonSerializer.Serialize(products.MetaData));
+            
+            Response.AddPaginationHeader(products.MetaData);
 
             return products;
-        }
+        }   
 
         // GET api/<ProductsController>/5
         [HttpGet("{id}")]
@@ -50,6 +51,17 @@ namespace API.Controllers
             return product;
         }
 
-        
+        [HttpGet("filters")]
+        public async Task<IActionResult> GetFilters()
+        {
+            var brands = await _storeContext.Products.Select(p => p.Brand)
+                .Distinct().ToListAsync();
+            var types = await _storeContext.Products.Select(p => p.Type)
+                .Distinct().ToListAsync();
+
+            return Ok(new {brands, types});
+        }
+
+
     }
 }
