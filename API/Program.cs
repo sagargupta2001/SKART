@@ -25,9 +25,9 @@ namespace API
                 await context.Database.MigrateAsync();
                 await DbInitializer.Initialize(context, userManager);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Problem Migrating Data");
+                logger.LogError(ex, "Problem migrating data");
             }
 
             await host.RunAsync();

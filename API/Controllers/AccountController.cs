@@ -4,9 +4,9 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
@@ -16,18 +16,18 @@ namespace API.Controllers
         private readonly UserManager<User> _userManager;
         private readonly TokenService _tokenService;
         private readonly StoreContext _context;
-
         public AccountController(UserManager<User> userManager, TokenService tokenService, StoreContext context)
         {
-            _userManager = userManager;
-            _tokenService = tokenService;
             _context = context;
+            _tokenService = tokenService;
+            _userManager = userManager;
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
             var user = await _userManager.FindByNameAsync(loginDto.Username);
+
             if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 return Unauthorized();
 
@@ -46,14 +46,14 @@ namespace API.Controllers
             {
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user),
-                Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket.MapBasketToDto()
+                Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket?.MapBasketToDto()
             };
         }
 
         [HttpPost("register")]
         public async Task<ActionResult> Register(RegisterDto registerDto)
         {
-            var user = new User {UserName = registerDto.Username, Email = registerDto.Email};
+            var user = new User { UserName = registerDto.Username, Email = registerDto.Email };
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -78,10 +78,13 @@ namespace API.Controllers
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
 
+            var userBasket = await RetrieveBasket(User.Identity.Name);
+
             return new UserDto
             {
                 Email = user.Email,
-                Token = await _tokenService.GenerateToken(user)
+                Token = await _tokenService.GenerateToken(user),
+                Basket = userBasket?.MapBasketToDto()
             };
         }
 

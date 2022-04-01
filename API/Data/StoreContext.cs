@@ -9,11 +9,9 @@ namespace API.Data
     {
         public StoreContext(DbContextOptions options) : base(options)
         {
-            
         }
 
         public DbSet<Product> Products { get; set; }
-
         public DbSet<Basket> Baskets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -22,8 +20,8 @@ namespace API.Data
 
             builder.Entity<IdentityRole>()
                 .HasData(
-                    new IdentityRole {Name = "Member", NormalizedName = "MEMBER"},
-                    new IdentityRole {Name = "Admin", NormalizedName = "ADMIN"}
+                    new IdentityRole { Name = "Member", NormalizedName = "MEMBER" },
+                    new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" }
                 );
         }
     }
