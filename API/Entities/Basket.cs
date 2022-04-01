@@ -9,6 +9,7 @@ namespace API.Entities
 
         public string BuyerId { get; set; }
 
+        // one-to-many relationship between basket and items.
         public List<BasketItem> Items { get; set; } = new();
 
         public void AddItem(Product product, int quantity)

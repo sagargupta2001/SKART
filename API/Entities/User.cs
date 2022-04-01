@@ -2,8 +2,9 @@
 
 namespace API.Entities
 {
-    public class User : IdentityUser
+    public class User : IdentityUser<int>
     {
-
+        // one-to-one relationship between user and address.
+        public UserAddress Address { get; set; }
     }
 }
