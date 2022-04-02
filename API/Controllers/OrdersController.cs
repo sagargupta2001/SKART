@@ -9,6 +9,7 @@ using API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Controllers
 {
@@ -24,19 +25,19 @@ namespace API.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<List<Order>>> GetOrders()
+        public async Task<ActionResult<List<OrderDto>>> GetOrders()
         {
             return await _context.Orders
-                .Include(o => o.OrderItems)
+                .ProjectOrderToOrderDto()
                 .Where(x => x.BuyerId == User.Identity.Name)
                 .ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetOrder")]
-        public async Task<ActionResult<Order>> GetOrder(int id)
+        public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
             return await _context.Orders
-                .Include(x => x.OrderItems)
+                .ProjectOrderToOrderDto()
                 .Where(x => x.BuyerId == User.Identity.Name && x.Id == id)
                 .FirstOrDefaultAsync();
         }
@@ -111,7 +112,7 @@ namespace API.Controllers
             if (result) return CreatedAtRoute("GetOrder", new {id = order.Id}, order.Id);
 
             return BadRequest("Problem creating order");
-
+            
         }
     }
 }
