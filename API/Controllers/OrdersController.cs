@@ -9,7 +9,6 @@ using API.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace API.Controllers
 {
@@ -32,7 +31,7 @@ namespace API.Controllers
                 .Where(x => x.BuyerId == User.Identity.Name)
                 .ToListAsync();
         }
-
+        
         [HttpGet("{id}", Name = "GetOrder")]
         public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
@@ -92,8 +91,11 @@ namespace API.Controllers
 
             if (orderDto.SaveAddress)
             {
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName == User.Identity.Name);
-                user.Address = new UserAddress
+                var user = await _context.Users
+                    .Include(a => a.Address)
+                    .FirstOrDefaultAsync(x => x.UserName == User.Identity.Name);
+
+                var address = new UserAddress
                 {
                     FullName = orderDto.ShippingAddress.FullName,
                     Address1 = orderDto.ShippingAddress.Address1,
@@ -103,8 +105,7 @@ namespace API.Controllers
                     Zip = orderDto.ShippingAddress.Zip,
                     Country = orderDto.ShippingAddress.Country
                 };
-
-                _context.Update(user);
+                if (user != null) user.Address = address;
             }
 
             var result = await _context.SaveChangesAsync() > 0;
