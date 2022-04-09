@@ -37,7 +37,7 @@ namespace API.Services
 
                 intent = await service.CreateAsync(options);
             }
-
+            
             else
             {
                 var options = new PaymentIntentUpdateOptions
