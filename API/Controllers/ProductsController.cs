@@ -2,9 +2,11 @@
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,7 +43,7 @@ namespace API.Controllers
         }   
 
         // GET api/<ProductsController>/5
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name = "GetProduct")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _storeContext.Products.FindAsync(id);
@@ -62,6 +64,15 @@ namespace API.Controllers
             return Ok(new {brands, types});
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<Product>> CreateProduct(CreateProductDto productDto)
+        {
+            _storeContext.Products.Add(productDto);
+            var result = await _storeContext.SaveChangesAsync() > 0;
+            if (result) return CreatedAtRoute("GetProduct", new { Id = product.Id }, product);
+            return BadRequest(new ProblemDetails { Title = "Problem creating new product " });
+        }
 
     }
 }
