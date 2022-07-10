@@ -6,6 +6,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,10 +18,12 @@ namespace API.Controllers
     public class ProductsController : BaseApiController
     {
         private readonly StoreContext _storeContext;
+        private readonly IMapper _mapper;
 
-        public ProductsController(StoreContext storeContext)
+        public ProductsController(StoreContext storeContext, IMapper mapper)
         {
             _storeContext = storeContext;
+            _mapper = mapper;
         }
 
         // GET: api/<ProductsController>
@@ -68,7 +71,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(CreateProductDto productDto)
         {
-            _storeContext.Products.Add(productDto);
+            var product = _mapper.Map<Product>(productDto);
+            _storeContext.Products.Add(product);
             var result = await _storeContext.SaveChangesAsync() > 0;
             if (result) return CreatedAtRoute("GetProduct", new { Id = product.Id }, product);
             return BadRequest(new ProblemDetails { Title = "Problem creating new product " });
