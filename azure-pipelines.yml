@@ -26,7 +26,7 @@ steps:
   inputs:
     command: publish
     publishWebProjects: false
-    projects: 'SKART/API/API.csproj'
+    projects: 'SKART/API/API/API.csproj'
     arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     zipAfterPublish: true
 
